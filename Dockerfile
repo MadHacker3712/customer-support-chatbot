@@ -6,6 +6,9 @@ WORKDIR /app
 # Copy requirements first — Docker caches this layer.
 # If only app.py changes, pip install does NOT re-run.
 COPY requirements.txt .
+# Install CPU-only torch first — avoids downloading 2GB+ of NVIDIA CUDA packages
+RUN pip install --no-cache-dir torch==2.3.0 --index-url https://download.pytorch.org/whl/cpu
+# Install remaining dependencies (torch already satisfied, pip will skip it)
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy fine-tuned model (run finetune.py locally first)
