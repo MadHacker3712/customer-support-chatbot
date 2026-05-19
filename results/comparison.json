@@ -1,0 +1,16 @@
+{
+  "baseline": {
+    "label": "Baseline (fp32)",
+    "size_mb": 474.7,
+    "avg_latency_ms": 4543.86,
+    "peak_memory_mb": 794.2
+  },
+  "quantized": {
+    "label": "Quantized (int8)",
+    "size_mb": 474.7,
+    "avg_latency_ms": 4477.93,
+    "peak_memory_mb": 1334.5
+  },
+  "size_reduction_pct": 0.0,
+  "latency_improvement_pct": 1.45
+}

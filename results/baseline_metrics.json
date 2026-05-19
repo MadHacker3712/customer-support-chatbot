@@ -1,0 +1,6 @@
+{
+  "label": "Baseline (fp32)",
+  "size_mb": 474.7,
+  "avg_latency_ms": 4543.86,
+  "peak_memory_mb": 794.2
+}

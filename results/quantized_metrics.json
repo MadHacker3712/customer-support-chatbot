@@ -1,0 +1,6 @@
+{
+  "label": "Quantized (int8)",
+  "size_mb": 474.7,
+  "avg_latency_ms": 4477.93,
+  "peak_memory_mb": 1334.5
+}
