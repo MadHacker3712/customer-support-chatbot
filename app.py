@@ -9,9 +9,12 @@ Run locally:  python app.py
 Then test:    curl -X POST http://localhost:8000/chat -H "Content-Type: application/json" -d "{\"message\": \"I need to cancel my order\"}"
 """
 
+import json
 import logging
 import os
 import time
+from datetime import datetime, timezone
+from pathlib import Path
 
 import torch
 import uvicorn
@@ -27,6 +30,30 @@ logger = logging.getLogger(__name__)
 
 MODEL_DIR = os.getenv("MODEL_DIR", "./models/chatbot-finetuned")
 MAX_NEW_TOKENS = int(os.getenv("MAX_NEW_TOKENS", "80"))
+
+# ── Structured logging ────────────────────────────────────────────────────────
+_LOG_DIR = Path(__file__).parent / "logs"
+_LOG_DIR.mkdir(exist_ok=True)
+_LOG_FILE = _LOG_DIR / "chatbot.jsonl"
+
+
+def _log_inference(input_len: int, output_len: int, latency_ms: float,
+                   status: str, error: str = None) -> None:
+    """Append one JSON line to logs/chatbot.jsonl."""
+    entry = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "service": "chatbot",
+        "event": "inference",
+        "latency_ms": round(latency_ms, 2),
+        "input_length": input_len,
+        "output_length": output_len,
+        "model": "DialoGPT-small-int8",
+        "status": status,
+        "error": error,
+        "estimated_cost_usd": round((input_len + output_len) / 4 / 1000 * 0.001, 8),
+    }
+    with open(_LOG_FILE, "a", encoding="utf-8") as _f:
+        _f.write(json.dumps(entry) + "\n")
 
 app = FastAPI(
     title="Customer Support Chatbot API",
@@ -105,6 +132,12 @@ def chat(request: ChatRequest):
     response_text = tokenizer.decode(new_token_ids, skip_special_tokens=True).strip()
 
     logger.info(f"Query: '{message[:60]}' | Latency: {latency_ms:.1f}ms")
+    _log_inference(
+        input_len=inputs["input_ids"].shape[1],
+        output_len=len(new_token_ids),
+        latency_ms=latency_ms,
+        status="ok",
+    )
 
     return ChatResponse(response=response_text, latency_ms=round(latency_ms, 1))
 

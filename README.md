@@ -1,6 +1,28 @@
 # Customer Support Chatbot — Optimized Backend
 # Project #1 | MLOps Engineer Path
 
+## Architecture
+
+```
+Customer Message
+      │
+      ▼
+FastAPI  /chat  (app.py)
+      │
+      ▼
+Tokenizer  (AutoTokenizer)
+      │
+      ▼
+DialoGPT-small INT8
+(torch.quantization.quantize_dynamic)
+      │
+      ▼
+Generate response (max 80 new tokens)
+      │
+      ├── Return JSON response + latency_ms
+      └── Append to logs/chatbot.jsonl
+```
+
 ## What This Is
 
 Fine-tuned DialoGPT-small on 500 customer support Q&A pairs (Bitext dataset).
